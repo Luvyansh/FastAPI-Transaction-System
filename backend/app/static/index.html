@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transaction Dashboard (Backend /web)</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 980px;
+        margin: 24px auto;
+        padding: 0 16px;
+        background: #f8fafc;
+        color: #0f172a;
+      }
+      .card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      h1, h2 { margin: 0 0 12px 0; }
+      form { display: grid; gap: 8px; }
+      input, button {
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+      }
+      button {
+        width: fit-content;
+        cursor: pointer;
+        background: #2563eb;
+        color: #fff;
+        border: none;
+      }
+      pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 10px;
+        border-radius: 8px;
+        overflow: auto;
+      }
+      .muted { color: #64748b; font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <h1>Transaction Dashboard (served from backend)</h1>
+    <p class="muted">
+      This page is served by FastAPI at <code>/web</code> (port 8000) and calls
+      the same backend APIs as the Vite frontend.
+    </p>
+
+    <section class="card">
+      <h2>Submit Transaction</h2>
+      <form id="tx-form">
+        <input name="user_id" placeholder="User ID" required />
+        <input name="amount" type="number" step="0.01" min="0.01" placeholder="Amount" required />
+        <input name="idempotency_key" placeholder="Idempotency Key" required />
+        <button type="submit">Submit</button>
+      </form>
+      <pre id="tx-out"></pre>
+    </section>
+
+    <section class="card">
+      <h2>User Summary</h2>
+      <form id="summary-form">
+        <input name="user_id" placeholder="User ID" required />
+        <button type="submit">Fetch Summary</button>
+      </form>
+      <pre id="summary-out"></pre>
+    </section>
+
+    <section class="card">
+      <h2>Ranking</h2>
+      <button id="ranking-btn">Refresh Ranking</button>
+      <pre id="ranking-out"></pre>
+    </section>
+
+    <script>
+      async function api(path, options = {}) {
+        const response = await fetch(path, {
+          headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+          ...options,
+        });
+        const text = await response.text();
+        let body = text;
+        try {
+          body = JSON.parse(text);
+        } catch (_) {}
+        return { status: response.status, body };
+      }
+
+      function write(id, payload) {
+        document.getElementById(id).textContent = JSON.stringify(payload, null, 2);
+      }
+
+      document.getElementById("tx-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const form = new FormData(event.target);
+        const payload = {
+          user_id: form.get("user_id"),
+          amount: Number(form.get("amount")),
+          idempotency_key: form.get("idempotency_key"),
+        };
+        const result = await api("/transaction", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        write("tx-out", result);
+      });
+
+      document.getElementById("summary-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const form = new FormData(event.target);
+        const userId = encodeURIComponent(form.get("user_id"));
+        const result = await api(`/summary/${userId}`);
+        write("summary-out", result);
+      });
+
+      document.getElementById("ranking-btn").addEventListener("click", async () => {
+        const result = await api("/ranking");
+        write("ranking-out", result);
+      });
+    </script>
+  </body>
+</html>
