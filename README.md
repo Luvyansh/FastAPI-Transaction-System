@@ -1,3 +1,10 @@
+<img width="1919" height="910" alt="image" src="https://github.com/user-attachments/assets/e86c9181-f6d9-4630-9743-b535e0c6be34" />
+
+
+
+
+
+
 # Transaction Ranking System
 
 A practical full-stack project with FastAPI + SQLite backend and React frontend.
