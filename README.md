@@ -242,7 +242,7 @@ flowchart TD
     A[User enters transaction in UI] --> B[Frontend sends POST request]
     B --> C{HTTPS/TLS enabled by deployment?}
     C -->|Yes| D[Request reaches backend]
-    C -->|No (local dev)| D
+    C -->|"No (local dev)"| D
 
     D --> E[Validate input fields]
     E -->|Invalid| F[Return 422 with error details]

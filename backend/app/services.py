@@ -52,7 +52,7 @@ def calculate_score(total_volume: float, transaction_count: int, abuse_flagged: 
 def unique_tiebreaker(user_id: str) -> float:
     # Use first 48 bits of SHA-256 as a stable fractional tie-breaker.
     # This keeps ordering deterministic across servers and requests.
-    digest_prefix = hashlib.sha256(user_id.encode("utf-8")).hexdigest()[:12]
+    digest_prefix = hashlib.sha256(user_id.encode("utf-8")).hexdigest()[:12] #Hash Function -> Deterministic output
     normalized = int(digest_prefix, 16) / float(16**12)
     return normalized * UNIQUE_EPSILON
 
